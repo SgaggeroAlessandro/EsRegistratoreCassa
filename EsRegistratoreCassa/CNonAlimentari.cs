@@ -16,13 +16,11 @@ namespace EsRegistratoreCassa
         }
 
         private string materiale;
-        protected string Materiale
+        public string Materiale
         {
             get => materiale;
             set
             {
-                if (string.IsNullOrEmpty(value))
-                    throw new ArgumentException("Inserisci un materiale valido");
                 materiale = value;
             }
         }
@@ -41,7 +39,7 @@ namespace EsRegistratoreCassa
         public override void sconta()
         {
             string mat = Materiale.ToLower();
-            if (mat == "vetro" || mat == "carta" || mat == "plastica")
+            if (mat == MaterialiRiciclabili.vetro.ToString() || mat == MaterialiRiciclabili.carta.ToString() || mat == MaterialiRiciclabili.plastica.ToString())
             {
                 Prezzo *= 0.90; 
             }

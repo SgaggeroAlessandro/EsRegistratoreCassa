@@ -44,5 +44,15 @@ namespace EsRegistratoreCassa
             }
             return $"Nome del cliente: {Nome} \n Dispone della carta fedeltà: {tessera}";
         }
+
+        public bool HaComprato(long codiceBarre)
+        {
+            foreach (CArticolo art in storico)
+            {
+                if (art.CodiceBarre == codiceBarre)
+                    return true;
+            }
+            return false;
+        }
     }
 }

@@ -11,14 +11,14 @@ namespace EsRegistratoreCassa
     {
         static void Main(string[] args)
         {
-
+            List<CClienti> elencoClienti = new List<CClienti>();
             List<CArticolo> storico = new List<CArticolo>();
             string fedeltà;
             do
             {
                 Console.WriteLine("Possiedi una tessera fedeltà?");
                 fedeltà = Console.ReadLine();
-            } while (string.IsNullOrEmpty(fedeltà) || (fedeltà.ToLower() != "sì" && fedeltà.ToLower() != "si" || fedeltà.ToLower() != "no"));
+            } while (string.IsNullOrEmpty(fedeltà) || (fedeltà.ToLower() != "sì" && fedeltà.ToLower() != "si" && fedeltà.ToLower() != "no"));
 
 
             bool tessera;
@@ -39,76 +39,92 @@ namespace EsRegistratoreCassa
             CClienti cliente = new CClienti(nome, tessera);
             for (int i = 0; i < 3; i++)
             {
-                Console.WriteLine("Scrivi la descrizione dell'articolo acquistato");
-                string descrizione = Console.ReadLine();
-
-                double prezzo;
-                do
+                try
                 {
-                    Console.WriteLine("Inserisci il prezzo dell'articolo acquistato");
-                } while (!double.TryParse(Console.ReadLine(), out prezzo));
+                    Console.WriteLine("Scrivi la descrizione dell'articolo acquistato");
+                    string descrizione = Console.ReadLine();
 
-                long codice;
-                do
-                {
-                    Console.WriteLine("Inserisci il codice a barre del prodotto");
-                } while (!long.TryParse(Console.ReadLine(), out codice));
-                int anno;
-                do
-                {
-                    Console.WriteLine("Inserisci l'anno di scadenza del prodotto");
-                } while (!int.TryParse(Console.ReadLine(), out anno));
+                    double prezzo;
+                    do
+                    {
+                        Console.WriteLine("Inserisci il prezzo dell'articolo acquistato");
+                    } while (!double.TryParse(Console.ReadLine(), out prezzo));
 
-                
+                    long codice;
+                    do
+                    {
+                        Console.WriteLine("Inserisci il codice a barre del prodotto");
+                    } while (!long.TryParse(Console.ReadLine(), out codice));
+                    int anno;
+                    do
+                    {
+                        Console.WriteLine("Inserisci l'anno di scadenza del prodotto");
+                    } while (!int.TryParse(Console.ReadLine(), out anno));
 
-                CAlimentari prodotto = new CAlimentari(codice, descrizione, prezzo, anno);
-                
-                if (tessera)
-                {
-                    prodotto.sconta();
+
+
+                    CAlimentari prodotto = new CAlimentari(codice, descrizione, prezzo, anno);
+
+                    if (tessera)
+                    {
+                        prodotto.sconta();
+                    }
+                    Console.WriteLine(prodotto.StampaInfo());
+                    storico.Add(prodotto);
+                    
                 }
-                prodotto.StampaInfo();
-                storico.Add(prodotto);
-                
-                
-                
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                    i--;
+                }
             }
 
             for(int i = 0; i < 2; i++)
             {
-                Console.WriteLine("Scrivi la descrizione dell'articolo acquistato");
-                string descrizione = Console.ReadLine();
-
-                double prezzo;
-                do
+                try
                 {
-                    Console.WriteLine("Inserisci il prezzo dell'articolo acquistato");
-                } while (!double.TryParse(Console.ReadLine(), out prezzo));
 
-                long codice;
-                do
-                {
-                    Console.WriteLine("Inserisci il codice a barre del prodotto");
-                } while (!long.TryParse(Console.ReadLine(), out codice));
 
-                string materiale;
-                do
-                {
-                    Console.WriteLine("Inserisci il materiale del prodotto");
-                    materiale = Console.ReadLine();
-                } while (string.IsNullOrEmpty(materiale));
+                    Console.WriteLine("Scrivi la descrizione dell'articolo acquistato");
+                    string descrizione = Console.ReadLine();
 
-                CNonAlimentari prodotto = new CNonAlimentari(codice, descrizione, prezzo, materiale);
-                if (tessera)
-                {
-                    prodotto.sconta();
+                    double prezzo;
+                    do
+                    {
+                        Console.WriteLine("Inserisci il prezzo dell'articolo acquistato");
+                    } while (!double.TryParse(Console.ReadLine(), out prezzo));
+
+                    long codice;
+                    do
+                    {
+                        Console.WriteLine("Inserisci il codice a barre del prodotto");
+                    } while (!long.TryParse(Console.ReadLine(), out codice));
+
+                    string materiale;
+                    do
+                    {
+                        Console.WriteLine("Inserisci il materiale del prodotto");
+                        materiale = Console.ReadLine();
+                    } while (string.IsNullOrEmpty(materiale));
+
+                    CNonAlimentari prodotto = new CNonAlimentari(codice, descrizione, prezzo, materiale);
+                    if (tessera)
+                    {
+                        prodotto.sconta();
+                    }
+                    Console.WriteLine(prodotto.StampaInfo());
+                    storico.Add(prodotto);
+                    
                 }
-                prodotto.StampaInfo();
-                storico.Add(prodotto);
-                
-                
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                    i--;
+                }
             }
             cliente.storico = storico;
+            elencoClienti.Add(cliente);
             double totale = 0;
 
             foreach (CArticolo art in storico)
@@ -122,25 +138,29 @@ namespace EsRegistratoreCassa
             {
                 Console.WriteLine("Inserisci il codice a barre del prodotto da cercare");
             } while (!long.TryParse(Console.ReadLine(), out codiceCercato));
-            bool trovato = false;
-            foreach (CArticolo articolo in storico)
+
+            List<CClienti> clientiTrovati = new List<CClienti>();
+
+            foreach (CClienti c in elencoClienti)
             {
-                ;
-                if(articolo.CodiceBarre == codiceCercato)
-                {
-                    trovato = true;
-                    break;
-                }
+                if (c.HaComprato(codiceCercato))
+                    clientiTrovati.Add(c);
             }
-            if (trovato)
+
+            if (clientiTrovati.Count > 0)
             {
-                Console.WriteLine($"\nIl cliente {cliente.InfoCliente()} ha acquistato il prodotto cercato.");
+                Console.WriteLine($"\nClienti che hanno acquistato il prodotto con codice {codiceCercato}:");
+                foreach (CClienti c in clientiTrovati)
+                {
+                    Console.WriteLine(c.InfoCliente() + "\n");
+                   
+                }
             }
             else
             {
-                Console.WriteLine("\nNessun acquisto trovato con questo codice a barre.");
+                Console.WriteLine("\nNessun cliente ha acquistato un prodotto con questo codice a barre.");
             }
-            
+
         }
     }
 }
