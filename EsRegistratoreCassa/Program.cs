@@ -13,6 +13,7 @@ namespace EsRegistratoreCassa
         {
             List<CClienti> elencoClienti = new List<CClienti>();
             List<CArticolo> storico = new List<CArticolo>();
+            CRegistratore registratore = new CRegistratore();
             string fedeltà;
             do
             {
@@ -59,7 +60,7 @@ namespace EsRegistratoreCassa
                     do
                     {
                         Console.WriteLine("Inserisci l'anno di scadenza del prodotto");
-                    } while (!int.TryParse(Console.ReadLine(), out anno));
+                    } while (!int.TryParse(Console.ReadLine(), out anno) || anno < DateTime.Now.Year);
 
 
 
@@ -133,6 +134,23 @@ namespace EsRegistratoreCassa
                 totale += art.Prezzo;
             }
             Console.WriteLine("Totale da pagare: " + totale);
+            int mese;
+
+            do
+            {
+                Console.WriteLine("Inserisci il mese di emissione dello scontrino");
+            } while (!int.TryParse(Console.ReadLine(), out mese) || mese < 1 || mese > 12);
+
+            int settimana;
+            do
+            {
+                Console.WriteLine("Inserisci la settimana di emissione dello scontrino");
+            } while (!int.TryParse(Console.ReadLine(), out settimana) || settimana < 1 || settimana > 52);
+
+            registratore.EmettiScontrino(totale, mese, settimana);
+
+            registratore.MostraListaScontrini();
+
             long codiceCercato;
             do
             {
@@ -161,6 +179,27 @@ namespace EsRegistratoreCassa
                 Console.WriteLine("\nNessun cliente ha acquistato un prodotto con questo codice a barre.");
             }
 
+
+            Console.WriteLine("Lista scontrini per mese: \n");
+            registratore.MostraScontriniDelMese(mese);
+
+            Console.WriteLine("Lista scontrini per settimana \n");
+            registratore.MostraScontriniDellaSettimana(settimana);
+
+
+            string scelta;
+            do
+            {
+                Console.WriteLine("Vuoi eliminare l'ultimo scontrino)");
+                scelta = Console.ReadLine();
+            } while (string.IsNullOrEmpty(scelta) || (scelta.ToLower() !=  "si" && scelta.ToLower() != "no" && scelta.ToLower() != "sì"));
+
+            if(scelta.ToLower() != "no")
+            {
+                registratore.CancellaScontrino();
+                Console.WriteLine("Lista scontrini dopo l'eliminazione dell'ultimo scontrino: \n");
+                registratore.MostraListaScontrini();
+            }
         }
     }
 }
