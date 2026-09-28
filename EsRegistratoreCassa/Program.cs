@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+    //NEL MAIN SI GESTISCE SOLO INPUT E OUTPUT, LE FUNZIONI DI CALCOLO LE FA UNA CLASSE A PARTE
 namespace EsRegistratoreCassa
 {
     internal class Program
@@ -12,8 +12,10 @@ namespace EsRegistratoreCassa
         static void Main(string[] args)
         {
             List<CClienti> elencoClienti = new List<CClienti>();
-            List<CArticolo> storico = new List<CArticolo>();
+            List<CArticolo> acquisti = new List<CArticolo>();
             CRegistratore registratore = new CRegistratore();
+
+
             string fedeltà;
             do
             {
@@ -34,7 +36,7 @@ namespace EsRegistratoreCassa
             string nome;
             do
             {
-                Console.WriteLine("Inserisci il nome del cliente");
+                Console.WriteLine("Inserisci il nome e il cognome del cliente");
                 nome = Console.ReadLine();
             } while (string.IsNullOrEmpty(nome));
             CClienti cliente = new CClienti(nome, tessera);
@@ -71,7 +73,7 @@ namespace EsRegistratoreCassa
                         prodotto.sconta();
                     }
                     Console.WriteLine(prodotto.StampaInfo());
-                    storico.Add(prodotto);
+                    acquisti.Add(prodotto);
                     
                 }
                 catch (Exception ex)
@@ -115,7 +117,7 @@ namespace EsRegistratoreCassa
                         prodotto.sconta();
                     }
                     Console.WriteLine(prodotto.StampaInfo());
-                    storico.Add(prodotto);
+                    acquisti.Add(prodotto);
                     
                 }
                 catch (Exception ex)
@@ -124,32 +126,11 @@ namespace EsRegistratoreCassa
                     i--;
                 }
             }
-            cliente.storico = storico;
+            
             elencoClienti.Add(cliente);
-            double totale = 0;
 
-            foreach (CArticolo art in storico)
-            {
-                Console.WriteLine($"{art.Descrizione} - {art.Prezzo}");
-                totale += art.Prezzo;
-            }
-            Console.WriteLine("Totale da pagare: " + totale);
-            int mese;
-
-            do
-            {
-                Console.WriteLine("Inserisci il mese di emissione dello scontrino");
-            } while (!int.TryParse(Console.ReadLine(), out mese) || mese < 1 || mese > 12);
-
-            int settimana;
-            do
-            {
-                Console.WriteLine("Inserisci la settimana di emissione dello scontrino");
-            } while (!int.TryParse(Console.ReadLine(), out settimana) || settimana < 1 || settimana > 52);
-
-            registratore.EmettiScontrino(totale, mese, settimana);
-
-            registratore.MostraListaScontrini();
+            CScontrino scontrino = registratore.EmettiScontrino(cliente, acquisti);
+            Console.WriteLine(scontrino.Info());
 
             long codiceCercato;
             do
@@ -179,18 +160,55 @@ namespace EsRegistratoreCassa
                 Console.WriteLine("\nNessun cliente ha acquistato un prodotto con questo codice a barre.");
             }
 
-
+            int mese;
+            do
+            {
+                Console.WriteLine("Inserisci il mese di cui vedere gli scontrini");
+            }while(!int.TryParse(Console.ReadLine(), out mese) || mese < 1 || mese > 12);
             Console.WriteLine("Lista scontrini per mese: \n");
-            registratore.MostraScontriniDelMese(mese);
+            List<CScontrino> scontriniMese = registratore.MostraScontriniDelMese(mese);
+            if(scontriniMese.Count == 0)
+            {
+                Console.WriteLine("Nessuno scontrino presente");
 
+            }
+            else
+            {
+                foreach (CScontrino s in scontriniMese)
+                {
+                    Console.WriteLine(s.Info());
+                }
+            }
+
+            
+
+            int settimana;
+            do
+            {
+                Console.WriteLine("Inserisci la settimana del mese di cui vuoi vedere gli scontrini");
+            } while (!int.TryParse(Console.ReadLine(), out settimana) || settimana < 1 || settimana > 5);
             Console.WriteLine("Lista scontrini per settimana \n");
-            registratore.MostraScontriniDellaSettimana(settimana);
+            List<CScontrino> scontriniSettimana  = registratore.MostraScontriniDellaSettimana(mese, settimana);
+            if(scontriniSettimana.Count == 0)
+            {
+                Console.WriteLine("Nessuno scontrino presente");
 
+            }
+            else
+            {
+                foreach (CScontrino s in scontriniSettimana)
+                {
+                    Console.WriteLine(s.Info());
+                }
+            }
+
+
+            
 
             string scelta;
             do
             {
-                Console.WriteLine("Vuoi eliminare l'ultimo scontrino)");
+                Console.WriteLine("Vuoi eliminare l'ultimo scontrino?");
                 scelta = Console.ReadLine();
             } while (string.IsNullOrEmpty(scelta) || (scelta.ToLower() !=  "si" && scelta.ToLower() != "no" && scelta.ToLower() != "sì"));
 
@@ -198,7 +216,21 @@ namespace EsRegistratoreCassa
             {
                 registratore.CancellaScontrino();
                 Console.WriteLine("Lista scontrini dopo l'eliminazione dell'ultimo scontrino: \n");
-                registratore.MostraListaScontrini();
+                List<CScontrino> lista = registratore.MostraListaScontrini();
+                if(lista.Count == 0)
+                {
+                    Console.WriteLine("Nessuno scontrino presente");
+
+                }
+                else
+                {
+                    foreach (CScontrino s in lista)
+                    {
+                        Console.WriteLine(s.Info());
+                    }
+                }
+                
+                
             }
         }
     }

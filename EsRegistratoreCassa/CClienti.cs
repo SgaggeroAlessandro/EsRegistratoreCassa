@@ -8,13 +8,13 @@ namespace EsRegistratoreCassa
 {
     public class CClienti
     {
-        public List<CArticolo> storico = new List<CArticolo>();
+        private List<CScontrino> storico = new List<CScontrino>();
 
         private string nome;
 
         public bool TesseraFedeltà { get; set; }
 
-        protected string Nome
+        public string Nome
         {
             get => nome;
             set
@@ -47,12 +47,22 @@ namespace EsRegistratoreCassa
 
         public bool HaComprato(long codiceBarre)
         {
-            foreach (CArticolo art in storico)
+            foreach (CScontrino scontrino in storico)
             {
-                if (art.CodiceBarre == codiceBarre)
-                    return true;
+                foreach(CArticolo articolo in scontrino.Articoli)
+                {
+                    if(articolo.CodiceBarre == codiceBarre)
+                    {
+                        return true;
+                    }
+                }
             }
             return false;
+        }
+
+        public void AggiungiAcquisto(CScontrino scontrino)
+        {
+            storico.Add(scontrino);
         }
     }
 }

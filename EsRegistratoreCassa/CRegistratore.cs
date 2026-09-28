@@ -9,64 +9,31 @@ namespace EsRegistratoreCassa
     public class CRegistratore
     {
         private List<CScontrino> Cassa = new List<CScontrino>();
-        private List<CScontrino>[] ScontriniperMese = new List<CScontrino>[13];
-        private List<CScontrino>[] ScontriniperSettimna = new List<CScontrino>[53];
-        private int numeroScontrino;
-        private DateTime dataCorrente;
-
-        protected int NumeroScontrino
-        {
-            get
-            {
-                return numeroScontrino;
-            }
-            set
-            {
-                numeroScontrino = value;
-            }
-        }
-        protected DateTime DataCorrente
-        {
-            get
-            {
-                return dataCorrente;
-            }
-            set
-            {
-                dataCorrente = value;
-            }
-        }
+        
+        
         
         public CRegistratore()
         {
-            for(int i = 0; i < ScontriniperMese.Length; i++)
-            {
-                ScontriniperMese[i] = new List<CScontrino>();
-            }
-            for(int i = 0; i < ScontriniperSettimna.Length; i++)
-            {
-                ScontriniperSettimna[i] = new List<CScontrino>();
-            }
-            this.NumeroScontrino = 0;
-            this.DataCorrente = DateTime.Now.Date; 
+            
         }
 
-        public void EmettiScontrino(double importo, int mese, int settimana)
+        public CScontrino EmettiScontrino(CClienti cliente, List<CArticolo> articoli)
         {
-            
-            if (DataCorrente != DateTime.Now.Date)
+            DateTime oggi = DateTime.Now.Date;
+            int scontrini = 1;
+
+            foreach(CScontrino s in Cassa)
             {
-                NumeroScontrino = 0;
-                DataCorrente = DateTime.Now.Date;
+                if(s.Data == oggi)
+                {
+                    scontrini++;
+                }
             }
-            NumeroScontrino++;
-            CScontrino scontrino = new CScontrino(NumeroScontrino);
-            scontrino.EmettiScontrino(importo, DataCorrente);
+            CScontrino scontrino = new CScontrino(cliente, oggi, scontrini, articoli);
             Cassa.Add(scontrino);
+            cliente.AggiungiAcquisto(scontrino);
 
-            ScontriniperMese[mese].Add(scontrino);
-            ScontriniperSettimna[settimana].Add(scontrino);
-
+            return scontrino;
         }
         public void CancellaScontrino()
         {
@@ -76,44 +43,58 @@ namespace EsRegistratoreCassa
             }
             else
             {
-                CScontrino ultimoscontrino = Cassa[Cassa.Count  - 1];
-                
-                Cassa.Remove(ultimoscontrino);
-                foreach(var lista in ScontriniperSettimna)
-                {
-                    lista.Remove(ultimoscontrino);
-                }
-
-                foreach(var lista in ScontriniperMese)
-                {
-                    lista.Remove(ultimoscontrino);
-                }
-                numeroScontrino--;
+                Cassa.RemoveAt(Cassa.Count - 1);
             }
             
         }
-        public void MostraListaScontrini()
+        public List<CScontrino> MostraListaScontrini()
         {
-            foreach(CScontrino scontrino in Cassa)
+            List<CScontrino> risultato = new List<CScontrino>();
+            DateTime oggi = DateTime.Now.Date;
+            foreach(CScontrino s in Cassa)
             {
-                Console.WriteLine(scontrino.Info());
+                if(s.Data == oggi)
+                {
+                    risultato.Add(s);
+                }
             }
+            return risultato;
         }
 
-        public void MostraScontriniDelMese(int mese)
+        public List<CScontrino> MostraScontriniDelMese(int mese)
         {
-            foreach (CScontrino scontrino in ScontriniperMese[mese])
+            List<CScontrino> raccolta = new List<CScontrino>();
+
+            foreach (CScontrino scontrino in Cassa)
             {
-                Console.WriteLine(scontrino.Info());
+                if(scontrino.Data.Month == mese)
+                {
+                    raccolta.Add(scontrino);
+                }
             }
+
+            return raccolta;
         }
 
-        public void MostraScontriniDellaSettimana(int settimana)
+        private int CalcoloSettimana(DateTime data)
         {
-            foreach (CScontrino scontrino in ScontriniperSettimna[settimana])
+            return (data.Day - 1) / 7 + 1;
+        }
+
+        public List<CScontrino> MostraScontriniDellaSettimana(int mese, int settimana)
+        {
+            List<CScontrino> raccolta = new List<CScontrino>();
+
+
+            foreach (CScontrino scontrino in Cassa)
             {
-                Console.WriteLine(scontrino.Info());
+                if(scontrino.Data.Month == mese && CalcoloSettimana(scontrino.Data) == settimana)
+                {
+                    raccolta.Add(scontrino);
+                }
             }
+
+            return raccolta;
         }
     }
 }

@@ -57,8 +57,7 @@ namespace EsRegistratoreCassa
             return $"Codice a barre del prodotto: {CodiceBarre}\n Descrizione del prodotto: {Descrizione}  \n Prezzo: {Prezzo}\n";
         }
         public virtual void  sconta()
-        {
-            
+        {   
              Prezzo *= 0.95;
         }
     }
